@@ -2,25 +2,7 @@
 #include <ctime>
 #include <iomanip>
 #include <cstdlib>
-#include "log.h"
-
-// inline std::string NowTime()
-// {
-//     char buffer[11];
-//     const int buffer_len = sizeof(buffer);
-//     time_t t;
-//     time(&t);
-//     tm r = {0};
-//     strftime(buffer, buffer_len, "%X", localtime_r(&t, &r));
-//     buffer[buffer_len - 1] = 0;
-//     struct timeval tv;
-//     gettimeofday(&tv, 0);
-//     char result[100];
-//     const int result_len = sizeof(result);
-//     snprintf(result, result_len, "%s.%03ld", buffer, (long)tv.tv_usec / 1000);
-//     result[result_len - 1] = 0;
-//     return result;
-// }
+#include "Logger.h"
 
 // Convert date and time info from tm to a character string
 // in format "YYYY-mm-DD HH:MM:SS" and send it to a stream
@@ -37,7 +19,7 @@ std::ostream& operator<< (std::ostream& stream, const tm* tm)
 }
 
 //template <typename T> Log<T>::Log():lev(logDEBUG){}
-std::ostringstream& Log::Get(Level level)
+std::ostringstream& Logger::Get(Level level)
 {
    m_level = level;
    mMutex.lock();
@@ -49,9 +31,9 @@ std::ostringstream& Log::Get(Level level)
     return os;
 }
 
-Log::Log():m_level(Level::DEBUG){}
+Logger::Logger():m_level(Level::DEBUG){}
 
-Log::~Log()
+Logger::~Logger()
 {
     // os << std::endl;
     // T::Output( os.str(),lev); // T::Output( os.str());
@@ -70,7 +52,7 @@ Log::~Log()
 //     static Level reportingLevel = Level::DEBUG;
 //     return reportingLevel;
 // }
-inline const tm* Log::getLocalTime() {
+inline const tm* Logger::getLocalTime() {
  	auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
  	localtime_r(&in_time_t, &mLocalTime);
  	return &mLocalTime;

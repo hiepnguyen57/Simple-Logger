@@ -4,17 +4,17 @@
 #include <thread>
 #include <list>
 #include <memory>
-#include "log.h"
+#include "Logger.h"
 
 using namespace std;
-#define LOG Log().Get(Level::DEBUG)
+#define LOG Logger().Get(Level::DEBUG)
 int main() {
 	//Log::ReportingLevel() = Level::DEBUG;
 	const int count = 3;
-	Log().Get(Level::INFO) << "A loop with "    << count << " iterations";
+	Logger().Get(Level::INFO) << "A loop with "    << count << " iterations";
 	for (int i = 0; i != count; ++i)
 	{
-   		Log().Get(Level::ERROR)        << "the counter i = " << i;
+   		Logger().Get(Level::ERROR) << "the counter i = " << i;
 	}
 	LOG << "hello world";
 

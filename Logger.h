@@ -7,29 +7,21 @@
 #include <mutex>
 #include <memory>
 #include "Level.h"
-//#include <ansi.h>
 
-
-//inline std::string NowTime();
-
-//enum TLogLevel {logERROR, logWARNING, logINFO, logDEBUG, logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4, logDEBUG5};
-
-class Log{
+class Logger{
  public:
-   Log();
-   virtual ~Log();
+   Logger();
+   virtual ~Logger();
    std::ostringstream& Get(Level level = Level::INFO);
    //static Level& ReportingLevel();
-   // static std::string ToString(TLogLevel level);
-   // static TLogLevel FromString(const std::string& level);
 protected:
    std::ostringstream os;
 private:
     inline const tm* getLocalTime();
 private:
     std::mutex mMutex;
-    Log(const Log&);
-    Log& operator =(const Log&);
+    Logger(const Logger&);
+    Logger& operator =(const Logger&);
     Level m_level;
     tm mLocalTime;
 };
