@@ -1,4 +1,3 @@
-#pragma once
 #include <sstream>
 #include <string>
 #include <stdio.h>
@@ -10,27 +9,27 @@
 
 //#define NDEBUG
 #ifdef NDEBUG
-#define DCSDK_DEBUG  	Log<OutputToFile>().Get(Level::NONE)
-#define DCSDK_INFO 		Log<OutputToFile>().Get(Level::NONE)
-#define DCSDK_WARN 		Log<OutputToFile>().Get(Level::NONE)
-#define DCSDK_ERROR 	Log<OutputToFile>().Get(Level::NONE)	
-#define DCSDK_CRITICAL 	Log<OutputToFile>().Get(Level::NONE)	
+#define DCSDK_DEBUG     Log<OutputToFile>().Get(Level::NONE)
+#define DCSDK_INFO      Log<OutputToFile>().Get(Level::NONE)
+#define DCSDK_WARN      Log<OutputToFile>().Get(Level::NONE)
+#define DCSDK_ERROR     Log<OutputToFile>().Get(Level::NONE)    
+#define DCSDK_CRITICAL  Log<OutputToFile>().Get(Level::NONE)    
 #else //DEBUG
 
-#define DCSDK_DEBUG 	Log<OutputToFile>().Get(Level::DEBUG)
-#define DCSDK_INFO 		Log<OutputToFile>().Get(Level::INFO)
-#define DCSDK_WARN 		Log<OutputToFile>().Get(Level::INFO)
-#define DCSDK_ERROR 	Log<OutputToFile>().Get(Level::ERROR)
-#define DCSDK_CRITICAL 	Log<OutputToFile>().Get(Level::CRITICAL)
+#define DCSDK_DEBUG     Log<OutputToFile>().Get(Level::DEBUG)
+#define DCSDK_INFO      Log<OutputToFile>().Get(Level::INFO)
+#define DCSDK_WARN      Log<OutputToFile>().Get(Level::WARN)
+#define DCSDK_ERROR     Log<OutputToFile>().Get(Level::ERROR)
+#define DCSDK_CRITICAL  Log<OutputToFile>().Get(Level::CRITICAL)
 #endif
 
 // Convert date and time info from tm to a character string
 // in format "YYYY-mm-DD HH:MM:SS" and send it to a stream
 std::ostream& operator<< (std::ostream& stream, const tm* tm)
 {
-  // This section since GCC 4.8.1 did not implement std::put_time
-  //  return stream << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
-  return stream << 1900 + tm->tm_year << '-' <<
+    // This section since GCC 4.8.1 did not implement std::put_time
+    // return stream << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
+    return stream << 1900 + tm->tm_year << '-' <<
     std::setfill('0') << std::setw(2) << tm->tm_mon + 1 << '-'
     << std::setfill('0') << std::setw(2) << tm->tm_mday << ' '
     << std::setfill('0') << std::setw(2) << tm->tm_hour << ':'
@@ -46,12 +45,12 @@ std::ostream& operator<< (std::ostream& stream, const tm* tm)
 template <typename log_policy>
 class Log {
 public:
-	Log();
-	virtual ~Log();
-	std::ostringstream& Get(Level level = Level::INFO);
-   	//static Level& ReportingLevel();
+    Log();
+    virtual ~Log();
+    std::ostringstream& Get(Level level = Level::INFO);
+    //static Level& ReportingLevel();
 protected:
-   std::ostringstream os;
+    std::ostringstream os;
 private:
     inline const tm* getLocalTime();
 private:
@@ -70,12 +69,13 @@ Log<log_policy>::Log()
 template <typename log_policy> 
 std::ostringstream& Log<log_policy>::Get(Level level)
 {
-	m_oMutex.lock();
-	if(level != Level::NONE) {
-    	os << "[" << getLocalTime() << "]";
-    	os << "[" << convertLevelToName(level) << "]\t";	
-	}
-	m_level = level;
+    m_oMutex.lock();
+    if(level != Level::NONE)
+    {
+        os << "[" << getLocalTime() << "]";
+        os << "[" << convertLevelToName(level) << "]\t";    
+    }
+    m_level = level;
     m_oMutex.unlock();
     return os;
 }
@@ -85,24 +85,24 @@ std::ostringstream& Log<log_policy>::Get(Level level)
 template <typename log_policy> 
 Log<log_policy>::~Log()
 {
-	if(m_level != Level::NONE) {
-		os << std::endl;
-		log_policy::Output(os.str());	
-	} 
+    if(m_level != Level::NONE) {
+        os << std::endl;
+        log_policy::Output(os.str());   
+    } 
 
 }
 
 // template <typename log_policy> Level& Log<log_policy>::ReportingLevel()
 // {
-// 	static Level reportingLevel =  Level::INFO;
-// 	return reportingLevel;
+//  static Level reportingLevel =  Level::INFO;
+//  return reportingLevel;
 // }
 
 template <typename log_policy> 
 inline const tm* Log<log_policy>::getLocalTime() {
-	auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	localtime_r(&in_time_t, &mLocalTime);
-	return &mLocalTime;
+    auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    localtime_r(&in_time_t, &mLocalTime);
+    return &mLocalTime;
 }
 
 
@@ -114,32 +114,32 @@ public:
 
 inline FILE*& OutputToFile::Stream()
 {
-	static FILE* pStream = stderr;
-	return pStream;
+    static FILE* pStream = stderr;
+    return pStream;
 }
 
 inline void OutputToFile::Output(const std::string& msg)
 {   
-	FILE* pStream = Stream();
-	if (!pStream) return;
+    FILE* pStream = Stream();
+    if (!pStream) return;
 
-	fprintf(pStream, "%s", msg.c_str());
-  	fflush(pStream);
+    fprintf(pStream, "%s", msg.c_str());
+    fflush(pStream);
 }
 
 
 // #include <sys/time.h>
 // inline std::string LogNowTime()
 // {
-// 	char buffer[64];
-// 	time_t t;
-// 	time(&t);
-// 	tm r = {0};
-// 	strftime(buffer, sizeof(buffer), "%Y-%m-%d  %H:%M:%S", localtime_r(&t, &r));
-// 	struct timeval tv;
-// 	gettimeofday(&tv, 0);
-// 	char result[100] = {0};
-// 	//std::sprintf(result, "%s.%03ld", buffer, (long)tv.tv_usec / 1000); 
-// 	sprintf(result, "%s.%06ld", buffer, (long)tv.tv_usec / 1000); 
-// 	return result;
+//  char buffer[64];
+//  time_t t;
+//  time(&t);
+//  tm r = {0};
+//  strftime(buffer, sizeof(buffer), "%Y-%m-%d  %H:%M:%S", localtime_r(&t, &r));
+//  struct timeval tv;
+//  gettimeofday(&tv, 0);
+//  char result[100] = {0};
+//  //std::sprintf(result, "%s.%03ld", buffer, (long)tv.tv_usec / 1000); 
+//  sprintf(result, "%s.%06ld", buffer, (long)tv.tv_usec / 1000); 
+//  return result;
 // }
