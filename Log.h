@@ -24,15 +24,15 @@ std::ostream& operator<< (std::ostream& stream, const tm* tm)
 
 /*
  * Log class.
- * typename T is output policy: stderr, stdout, Output2File, etc.
+ * typename log_policy is output policy: stderr, stdout, Output2File, etc.
  */
 
-template <typename T> class Log {
+template <typename log_policy> class Log {
  public:
    Log();
    virtual ~Log();
    std::ostringstream& Get(Level level = Level::INFO);
-   static Level& ReportingLevel();
+   //static Level& ReportingLevel();
 protected:
    std::ostringstream os;
 private:
@@ -45,11 +45,11 @@ private:
     tm mLocalTime;
 };
 
-template <typename T> Log<T>::Log()
+template <typename log_policy> Log<log_policy>::Log()
 {
 }
 
-template <typename T> std::ostringstream& Log<T>::Get(Level level)
+template <typename log_policy> std::ostringstream& Log<log_policy>::Get(Level level)
 {
 	m_oMutex.lock();
 	m_level = level;
@@ -61,19 +61,19 @@ template <typename T> std::ostringstream& Log<T>::Get(Level level)
 /*
  * In the destructor print out the message
  */
-template <typename T> Log<T>::~Log()
+template <typename log_policy> Log<log_policy>::~Log()
 {
 	os << std::endl;
-	T::Output(os.str());
+	log_policy::Output(os.str());
 }
 
-template <typename T> Level& Log<T>::ReportingLevel()
-{
-	static Level reportingLevel =  Level::INFO;
-	return reportingLevel;
-}
+// template <typename log_policy> Level& Log<log_policy>::ReportingLevel()
+// {
+// 	static Level reportingLevel =  Level::INFO;
+// 	return reportingLevel;
+// }
 
-template <typename T> inline const tm* Log<T>::getLocalTime() {
+template <typename log_policy> inline const tm* Log<log_policy>::getLocalTime() {
 	auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	localtime_r(&in_time_t, &mLocalTime);
 	return &mLocalTime;
@@ -101,3 +101,19 @@ inline void OutputToFile::Output(const std::string& msg)
   	fflush(pStream);
 }
 
+
+// #include <sys/time.h>
+// inline std::string LogNowTime()
+// {
+// 	char buffer[64];
+// 	time_t t;
+// 	time(&t);
+// 	tm r = {0};
+// 	strftime(buffer, sizeof(buffer), "%Y-%m-%d  %H:%M:%S", localtime_r(&t, &r));
+// 	struct timeval tv;
+// 	gettimeofday(&tv, 0);
+// 	char result[100] = {0};
+// 	//std::sprintf(result, "%s.%03ld", buffer, (long)tv.tv_usec / 1000); 
+// 	sprintf(result, "%s.%06ld", buffer, (long)tv.tv_usec / 1000); 
+// 	return result;
+// }
