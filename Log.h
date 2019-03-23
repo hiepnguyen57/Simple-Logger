@@ -8,6 +8,22 @@
 #include <iomanip>
 #include "Level.h"
 
+//#define NDEBUG
+#ifdef NDEBUG
+#define DCSDK_DEBUG  	Log<OutputToFile>().Get(Level::NONE)
+#define DCSDK_INFO 		Log<OutputToFile>().Get(Level::NONE)
+#define DCSDK_WARN 		Log<OutputToFile>().Get(Level::NONE)
+#define DCSDK_ERROR 	Log<OutputToFile>().Get(Level::NONE)	
+#define DCSDK_CRITICAL 	Log<OutputToFile>().Get(Level::NONE)	
+#else //DEBUG
+
+#define DCSDK_DEBUG 	Log<OutputToFile>().Get(Level::DEBUG)
+#define DCSDK_INFO 		Log<OutputToFile>().Get(Level::INFO)
+#define DCSDK_WARN 		Log<OutputToFile>().Get(Level::INFO)
+#define DCSDK_ERROR 	Log<OutputToFile>().Get(Level::ERROR)
+#define DCSDK_CRITICAL 	Log<OutputToFile>().Get(Level::CRITICAL)
+#endif
+
 // Convert date and time info from tm to a character string
 // in format "YYYY-mm-DD HH:MM:SS" and send it to a stream
 std::ostream& operator<< (std::ostream& stream, const tm* tm)
@@ -27,12 +43,13 @@ std::ostream& operator<< (std::ostream& stream, const tm* tm)
  * typename log_policy is output policy: stderr, stdout, Output2File, etc.
  */
 
-template <typename log_policy> class Log {
- public:
-   Log();
-   virtual ~Log();
-   std::ostringstream& Get(Level level = Level::INFO);
-   //static Level& ReportingLevel();
+template <typename log_policy>
+class Log {
+public:
+	Log();
+	virtual ~Log();
+	std::ostringstream& Get(Level level = Level::INFO);
+   	//static Level& ReportingLevel();
 protected:
    std::ostringstream os;
 private:
@@ -45,26 +62,34 @@ private:
     tm mLocalTime;
 };
 
-template <typename log_policy> Log<log_policy>::Log()
+template <typename log_policy> 
+Log<log_policy>::Log()
 {
 }
 
-template <typename log_policy> std::ostringstream& Log<log_policy>::Get(Level level)
+template <typename log_policy> 
+std::ostringstream& Log<log_policy>::Get(Level level)
 {
 	m_oMutex.lock();
+	if(level != Level::NONE) {
+    	os << "[" << getLocalTime() << "]";
+    	os << "[" << convertLevelToName(level) << "]\t";	
+	}
 	m_level = level;
-    os << "[" << getLocalTime() << "]"
-       << "[" << convertLevelToName(level) << "]\t";
     m_oMutex.unlock();
     return os;
 }
 /*
  * In the destructor print out the message
  */
-template <typename log_policy> Log<log_policy>::~Log()
+template <typename log_policy> 
+Log<log_policy>::~Log()
 {
-	os << std::endl;
-	log_policy::Output(os.str());
+	if(m_level != Level::NONE) {
+		os << std::endl;
+		log_policy::Output(os.str());	
+	} 
+
 }
 
 // template <typename log_policy> Level& Log<log_policy>::ReportingLevel()
@@ -73,7 +98,8 @@ template <typename log_policy> Log<log_policy>::~Log()
 // 	return reportingLevel;
 // }
 
-template <typename log_policy> inline const tm* Log<log_policy>::getLocalTime() {
+template <typename log_policy> 
+inline const tm* Log<log_policy>::getLocalTime() {
 	auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	localtime_r(&in_time_t, &mLocalTime);
 	return &mLocalTime;
