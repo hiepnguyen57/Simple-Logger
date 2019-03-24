@@ -1,26 +1,23 @@
 #include <sstream>
 #include <string>
-#include <stdio.h>
-#include <unistd.h>
 #include <mutex>
-#include <memory>
 #include <iomanip>
 #include "Level.h"
 
 //#define NDEBUG
 #ifdef NDEBUG
-#define DCSDK_DEBUG     Log<OutputToFile>().Get(Level::NONE)
-#define DCSDK_INFO      Log<OutputToFile>().Get(Level::NONE)
-#define DCSDK_WARN      Log<OutputToFile>().Get(Level::NONE)
-#define DCSDK_ERROR     Log<OutputToFile>().Get(Level::NONE)    
-#define DCSDK_CRITICAL  Log<OutputToFile>().Get(Level::NONE)    
+#define LOG_DEBUG     Log<OutputToFile>().Print(Level::NONE)
+#define LOG_INFO      Log<OutputToFile>().Print(Level::NONE)
+#define LOG_WARN      Log<OutputToFile>().Print(Level::NONE)
+#define LOG_ERROR     Log<OutputToFile>().Print(Level::NONE)    
+#define LOG_CRITICAL  Log<OutputToFile>().Print(Level::NONE)    
 #else //DEBUG
 
-#define DCSDK_DEBUG     Log<OutputToFile>().Get(Level::DEBUG)
-#define DCSDK_INFO      Log<OutputToFile>().Get(Level::INFO)
-#define DCSDK_WARN      Log<OutputToFile>().Get(Level::WARN)
-#define DCSDK_ERROR     Log<OutputToFile>().Get(Level::ERROR)
-#define DCSDK_CRITICAL  Log<OutputToFile>().Get(Level::CRITICAL)
+#define LOG_DEBUG     Log<OutputToFile>().Print(Level::DEBUG)
+#define LOG_INFO      Log<OutputToFile>().Print(Level::INFO)
+#define LOG_WARN      Log<OutputToFile>().Print(Level::WARN)
+#define LOG_ERROR     Log<OutputToFile>().Print(Level::ERROR)
+#define LOG_CRITICAL  Log<OutputToFile>().Print(Level::CRITICAL)
 #endif
 
 // Convert date and time info from tm to a character string
@@ -39,7 +36,7 @@ std::ostream& operator<< (std::ostream& stream, const tm* tm)
 
 /*
  * Log class.
- * typename log_policy is output policy: stderr, stdout, Output2File, etc.
+ * typename log_policy is output policy: stderr, stdout, OutputToFile, etc.
  */
 
 template <typename log_policy>
@@ -47,8 +44,9 @@ class Log {
 public:
     Log();
     virtual ~Log();
-    std::ostringstream& Get(Level level = Level::INFO);
-    //static Level& ReportingLevel();
+    std::ostringstream& Print(Level level = Level::INFO);
+    Level& getCurrentLevel();
+    void setLogLevel(Level newLevel);
 protected:
     std::ostringstream os;
 private:
@@ -67,7 +65,7 @@ Log<log_policy>::Log()
 }
 
 template <typename log_policy> 
-std::ostringstream& Log<log_policy>::Get(Level level)
+std::ostringstream& Log<log_policy>::Print(Level level)
 {
     m_oMutex.lock();
     if(level != Level::NONE)
@@ -92,11 +90,17 @@ Log<log_policy>::~Log()
 
 }
 
-// template <typename log_policy> Level& Log<log_policy>::ReportingLevel()
-// {
-//  static Level reportingLevel =  Level::INFO;
-//  return reportingLevel;
-// }
+template <typename log_policy> 
+Level& Log<log_policy>::getCurrentLevel()
+{
+    return m_level;
+}
+
+template <typename log_policy>
+void Log<log_policy>::setLogLevel(Level newLevel)
+{
+    m_level = newLevel;
+}
 
 template <typename log_policy> 
 inline const tm* Log<log_policy>::getLocalTime() {
@@ -119,7 +123,7 @@ inline FILE*& OutputToFile::Stream()
 }
 
 inline void OutputToFile::Output(const std::string& msg)
-{   
+{
     FILE* pStream = Stream();
     if (!pStream) return;
 

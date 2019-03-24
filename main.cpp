@@ -11,16 +11,16 @@ void threadFunc(int id)
 	for (int i = 0; i < 100; i++)
 	{
 	    // add a log message
-		DCSDK_DEBUG << "Thread " << id << ", Message " << i;
+		LOG_DEBUG << "Thread " << id << ", Message " << i;
 	}
 }
 
 int main()
 {
-	//remove below commands if you want to use file logger
-	// FILE* pFile = fopen("application.log", "a");
-	// OutputToFile::Stream() = pFile;
-
+#ifdef FILE_LOGGER
+	FILE* pFile = fopen("application.log", "a");
+	OutputToFile::Stream() = pFile;
+#endif
 	list<shared_ptr<thread>> oThreads;
 
 	// create 100 threads
@@ -33,7 +33,7 @@ int main()
 	for (int i = 0; i < 100; i++)
 	{
 	    // add a log message
-		DCSDK_INFO << "Main thread, Message " << i;
+		LOG_INFO << "Main thread, Message " << i;
 	}
 
 	// wait for all the threads to finish
