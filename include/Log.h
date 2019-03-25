@@ -25,13 +25,14 @@
 std::ostream& operator<< (std::ostream& stream, const tm* tm)
 {
     // This section since GCC 4.8.1 did not implement std::put_time
-    // return stream << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
-    return stream << 1900 + tm->tm_year << '-' <<
-    std::setfill('0') << std::setw(2) << tm->tm_mon + 1 << '-'
-    << std::setfill('0') << std::setw(2) << tm->tm_mday << ' '
-    << std::setfill('0') << std::setw(2) << tm->tm_hour << ':'
-    << std::setfill('0') << std::setw(2) << tm->tm_min << ':'
-    << std::setfill('0') << std::setw(2) << tm->tm_sec;
+    return stream << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
+    
+    // return stream << 1900 + tm->tm_year << '-' <<
+    // std::setfill('0') << std::setw(2) << tm->tm_mon + 1 << '-'
+    // << std::setfill('0') << std::setw(2) << tm->tm_mday << ' '
+    // << std::setfill('0') << std::setw(2) << tm->tm_hour << ':'
+    // << std::setfill('0') << std::setw(2) << tm->tm_min << ':'
+    // << std::setfill('0') << std::setw(2) << tm->tm_sec;
 }
 
 /*
