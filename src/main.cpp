@@ -2,10 +2,9 @@
 #include <list>
 #include <memory>
 #include "Log.h"
+
 using namespace std;
 
-
-// The thread function
 void threadFunc(int id)
 {
 	for (int i = 0; i < 100; i++)
@@ -21,6 +20,7 @@ int main()
 	FILE* pFile = fopen("application.log", "a");
 	OutputToFile::Stream() = pFile;
 #endif
+
 	list<shared_ptr<thread>> oThreads;
 
 	// create 100 threads

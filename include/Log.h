@@ -20,26 +20,11 @@
 #define LOG_CRITICAL  Log<OutputToFile>().Print(Level::CRITICAL)
 #endif
 
-// Convert date and time info from tm to a character string
-// in format "YYYY-mm-DD HH:MM:SS" and send it to a stream
-std::ostream& operator<< (std::ostream& stream, const tm* tm)
-{
-    // This section since GCC 4.8.1 did not implement std::put_time
-    return stream << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
-    
-    // return stream << 1900 + tm->tm_year << '-' <<
-    // std::setfill('0') << std::setw(2) << tm->tm_mon + 1 << '-'
-    // << std::setfill('0') << std::setw(2) << tm->tm_mday << ' '
-    // << std::setfill('0') << std::setw(2) << tm->tm_hour << ':'
-    // << std::setfill('0') << std::setw(2) << tm->tm_min << ':'
-    // << std::setfill('0') << std::setw(2) << tm->tm_sec;
-}
 
 /*
  * Log class.
  * typename log_policy is output policy: stderr, stdout, OutputToFile, etc.
  */
-
 template <typename log_policy>
 class Log {
 public:
@@ -71,7 +56,7 @@ std::ostringstream& Log<log_policy>::Print(Level level)
     m_oMutex.lock();
     if(level != Level::NONE)
     {
-        os << "[" << getLocalTime() << "]";
+        os << "[" << std::put_time(getLocalTime(), "%Y-%m-%d %H:%M:%S") << "]";   
         os << "[" << convertLevelToName(level) << "]\t";    
     }
     m_level = level;
